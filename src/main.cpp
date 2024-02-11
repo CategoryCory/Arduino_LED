@@ -2,10 +2,14 @@
 #include <Adafruit_NeoPixel.h>
 
 #define LED_PIN     2
-#define POT_PIN     A3
-#define NUM_PIXELS  3
+#define HUE_PIN     A0
+#define SAT_PIN     A1
+#define VAL_PIN     A2
+#define NUM_PIXELS  1
 
-int potValue = 0;
+float hue = 0;
+float sat = 0;
+float val = 0;
 
 Adafruit_NeoPixel pixels(NUM_PIXELS, LED_PIN, NEO_RGB);
 
@@ -17,11 +21,10 @@ void setup()
 
 void loop() 
 {
-  potValue = analogRead(POT_PIN) * 65535 / 1023;
+  hue = (analogRead(HUE_PIN) / 1023.0) * 65535;
+  sat = (analogRead(SAT_PIN) / 1023.0) * 255;
+  val = (analogRead(VAL_PIN) / 1023.0) * 255;
 
-  for (int i = 0; i < NUM_PIXELS; i++)
-  {
-    pixels.setPixelColor(i, pixels.ColorHSV((potValue + (i * 65535 / 3)) % 65535, 255, 8));
-    pixels.show();
-  }
+  pixels.setPixelColor(0, pixels.ColorHSV(hue, sat, val));
+  pixels.show();
 }

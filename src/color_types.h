@@ -4,10 +4,16 @@
 #include <stdint.h>
 
 typedef struct {
+  uint16_t analog_hue;
+  uint16_t analog_sat;
+  uint16_t analog_val;
+} AnalogColorValues;
+
+typedef struct {
   uint16_t led_hue;
   uint8_t led_sat;
   uint8_t led_val;
-} LEDColor;
+} NeoPixelColor;
 
 typedef struct {
   uint16_t hue;

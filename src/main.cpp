@@ -17,12 +17,13 @@
 #define LCD_DB6     10
 #define LCD_DB7     11
 
-LEDColor ledColor;
+AnalogColorValues analogValues;
+NeoPixelColor neoPixelColor;
 HSVColor hsvColor;
 RGBColor rgbColor;
 
-char hsv[32] = {};
-char rgb[32] = {};
+char hsv[17] = {};
+char rgb[17] = {};
 
 Adafruit_NeoPixel pixels(NUM_PIXELS, LED_PIN, NEO_RGB);
 LiquidCrystal lcd(LCD_RS, LCD_ENABLE, LCD_DB4, LCD_DB5, LCD_DB6, LCD_DB7);
@@ -42,6 +43,7 @@ void setup()
 {
   pinMode(BTN_PIN, INPUT_PULLUP);
   attachInterrupt(digitalPinToInterrupt(BTN_PIN), print_to_lcd, LOW);
+
   pixels.begin();
   pixels.clear();
   lcd.begin(16, 2);
@@ -50,16 +52,20 @@ void setup()
 
 void loop()
 {
-  ledColor.led_hue = (uint16_t)((analogRead(HUE_PIN) / 1023.0) * 65535);
-  ledColor.led_sat = (uint8_t)((analogRead(SAT_PIN) / 1023.0) * 255);
-  ledColor.led_val = (uint8_t)((analogRead(VAL_PIN) / 1023.0) * 255);
+  analogValues.analog_hue = analogRead(HUE_PIN);
+  analogValues.analog_sat = analogRead(SAT_PIN);
+  analogValues.analog_val = analogRead(VAL_PIN);
 
-  hsvColor.hue = (uint16_t)(ledColor.led_hue / 65535.0 * 360);
-  hsvColor.val = (uint8_t)(ledColor.led_val / 255.0 * 100);
-  hsvColor.sat = (uint8_t)(ledColor.led_sat / 255.0 * 100);
+  neoPixelColor.led_hue = (analogValues.analog_hue * 65535) / 1023;
+  neoPixelColor.led_sat = ((uint32_t)analogValues.analog_sat * 255) / 1023;
+  neoPixelColor.led_val = ((uint32_t)analogValues.analog_val * 255) / 1023;
+
+  hsvColor.hue = ((uint32_t)neoPixelColor.led_hue * 360) / 65535;
+  hsvColor.sat = (neoPixelColor.led_sat * 100) / 255;
+  hsvColor.val = (neoPixelColor.led_val * 100) / 255;
 
   hsv2rgb(&rgbColor, hsvColor.hue, hsvColor.sat, hsvColor.val);
 
-  pixels.setPixelColor(0, pixels.ColorHSV(ledColor.led_hue, ledColor.led_sat, ledColor.led_val));
+  pixels.setPixelColor(0, pixels.ColorHSV(neoPixelColor.led_hue, neoPixelColor.led_sat, neoPixelColor.led_val));
   pixels.show();
 }
